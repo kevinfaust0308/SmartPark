@@ -1,6 +1,6 @@
 # SmartPark
 
-Required software: SmartPark Owner
+Required software: SmartPark-myPortal
 
 #### Create a new parking lot in the owner's portal and scan the QR code to join the device with that lot
 #### Ability to: scan license plates or enter manually via speech-to-text and then pay via mobile payment reader
