@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">SmartPark</string>
+    <string name="lotAvailability">lotAvailability</string>
+    <string name="amountCharged">amountCharged</string>
+    <string name="timeSpent">timeSpent</string>
+    <string name="lotNumber">LotNumber</string>
+    <string name="ownerNumber">ownerNumber</string>
+    <string name="ParkingLots">ParkingLots</string>
+    <string name="UserData">UserData</string>
+</resources>

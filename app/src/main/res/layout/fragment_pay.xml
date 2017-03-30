@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:background="#00000000"
+              android:orientation="vertical"
+              android:padding="15dp">
+
+    <Button
+        android:id="@+id/verifyCreditCardBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/round_button"
+        android:padding="10dp"
+        android:textColor="@color/md_white_1000"
+        android:text="license is correct"/>
+
+    <Button
+        android:textColor="@color/md_white_1000"
+        android:id="@+id/retakeLicensePictureBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/round_button"
+        android:padding="10dp"
+        android:text="retake license"/>
+
+    <Button
+        android:textColor="@color/md_white_1000"
+        android:id="@+id/enterLicenseManuallyBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/round_button"
+        android:padding="10dp"
+        android:text="enter manually"/>
+
+</LinearLayout>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+
+    <!--
+    CREDIT CARD PROMPT
+    -->
+
+
+    <LinearLayout
+        android:id="@+id/credit_card_prompt_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="15dp"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/creditCardText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Credit card number"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textColor="@color/md_white_1000"
+                android:textColorHint="@color/md_white_1000"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/expiryDateText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="mm/yy"
+                    android:maxLength="5"
+                    android:textColor="@color/md_white_1000"
+                    android:textColorHint="@color/md_white_1000"/>
+
+                <EditText
+                    android:id="@+id/CVVText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="CVV"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:textColor="@color/md_white_1000"
+                    android:textColorHint="@color/md_white_1000"/>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/verifyCreditCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/round_button"
+            android:text="verify"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>
+
+

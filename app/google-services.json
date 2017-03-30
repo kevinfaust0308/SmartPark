@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "86515611193",
+    "firebase_url": "https://smartparkv2.firebaseio.com",
+    "project_id": "smartparkv2",
+    "storage_bucket": "smartparkv2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86515611193:android:fb12336f13ac0e8f",
+        "android_client_info": {
+          "package_name": "com.monsoonblessing.kevinfaust.smartpark"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "86515611193-olc3o4ufps2v7l48v2qub7154335o15e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.monsoonblessing.kevinfaust.smartpark",
+            "certificate_hash": "41117cc8ff164683e4361782e57149480455bdbf"
+          }
+        },
+        {
+          "client_id": "86515611193-adb4vpciikfrfudjalasspb97e4snlj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaCYtVlk-FWAWiyqNqZ5Xirpru-69rh1I"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "86515611193-adb4vpciikfrfudjalasspb97e4snlj2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
