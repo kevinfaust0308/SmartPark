@@ -17,6 +17,7 @@ public class Lot {
     private double accuracy;
     private int lifetimeScans;
     private ArrayList<Vehicle> vehicles;
+    private ArrayList<Vehicle> vehicleLog;
 
     public Lot() {
     }
@@ -102,6 +103,14 @@ public class Lot {
 
     public void setVehicles(ArrayList<Vehicle> vehicles) {
         this.vehicles = vehicles;
+    }
+
+    public ArrayList<Vehicle> getVehicleLog() {
+        return vehicleLog;
+    }
+
+    public void setVehicleLog(ArrayList<Vehicle> vehicleLog) {
+        this.vehicleLog = vehicleLog;
     }
 }
 

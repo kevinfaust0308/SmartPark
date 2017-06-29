@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
     TextView lotAvailabilityTextView;
 
     private DatabaseReference vehiclesDatabase;
+    private DatabaseReference vehicleLogDatabase;
     private DatabaseReference parkingLotDatabase;
 
     private String licensePlate;
@@ -123,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                 .child(getString(R.string.ParkingLots))
                 .child(lotNumber);
         vehiclesDatabase = parkingLotDatabase.child("Vehicles");
+        vehicleLogDatabase = parkingLotDatabase.child("VehicleLog");
 
         // dynamic updating lot space text
         parkingLotDatabase.addValueEventListener(new ValueEventListener() {
@@ -217,11 +219,15 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
         // vehiclesDatabase.child(licensePlate).setValue(v);
         Toast.makeText(MainActivity.this, "Successfully registered license in system", Toast.LENGTH_SHORT).show();
 
+        // add vehicle under license plate to current vehicles list
         vehiclesDatabase.child(licensePlate).setValue(v);
+        // add vehicle under push() to log entry of this vehicle
+        vehicleLogDatabase.push().setValue(v);
 
         // subtract an available spot
         decreaseSpaceAvailability();
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
