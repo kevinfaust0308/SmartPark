@@ -5,17 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
+    android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="25dp"
-    android:gravity="center_horizontal"
     tools:context="com.monsoonblessing.kevinfaust.smartpark.RegistrationActivity">
 
     <LinearLayout
-        android:padding="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="10dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -43,49 +43,50 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
         android:gravity="center_horizontal"
+        android:padding="10dp"
         android:text="Create a parking lot in the owner portal in order to continue"
         android:textColor="@color/md_white_1000"
         android:textSize="15sp"/>
 
 
-    <TextView
-        android:layout_marginTop="20dp"
-        android:gravity="center_horizontal"
-        android:padding="10dp"
-        android:background="#adadad"
-        android:maxLines="1"
-        android:textColor="#2d2d2d"
-        android:id="@+id/lot_id_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Lot ID"/>
-
     <ImageButton
         android:id="@+id/join_lot_btn"
-        android:padding="15dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_marginTop="20dp"
         android:background="#00000000"
-        android:src="@drawable/connect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:scaleType="centerInside"
+        android:src="@drawable/qr_connect"/>
 
 
     <TextView
-        android:textSize="14sp"
-        android:textColor="@color/md_white_1000"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Click to start"/>
+        android:layout_marginTop="5dp"
+        android:text="Click to scan"
+        android:textColor="@color/md_white_1000"
+        android:textSize="14sp"/>
+
+
+    <TextView
+        android:id="@+id/lot_id_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#adadad"
+        android:gravity="center_horizontal"
+        android:hint="No lot ID yet"
+        android:maxLines="1"
+        android:padding="10dp"
+        android:textColor="#2d2d2d"/>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <Button
-            android:visibility="gone"
             android:id="@+id/continue_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -94,7 +95,8 @@
             android:background="@color/md_teal_200"
             android:text="Continue"
             android:textColor="#ffffffff"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:visibility="gone"/>
 
     </FrameLayout>
 

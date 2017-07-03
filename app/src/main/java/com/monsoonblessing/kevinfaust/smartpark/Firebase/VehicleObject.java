@@ -4,31 +4,43 @@ package com.monsoonblessing.kevinfaust.smartpark.Firebase;
  * Created by Kevin Faust on 3/18/2017.
  */
 
-public class Vehicle {
+public class VehicleObject {
 
     private String plateNumber;
-    private long timeIn;
-    private Long timeOut;
+    private Long timeIn;
+    private Long timeOut; // Long object because we want it to have null value initially
     private Double ocrAccuracy;
 
-    public Vehicle() {
+    public VehicleObject() {
     }
 
-    public long getTimeIn() {
+
+    public VehicleObject(String plateNumber, Double ocrAccuracy) {
+        this.plateNumber = plateNumber;
+        this.timeIn = System.currentTimeMillis();
+        this.timeOut = null;
+        this.ocrAccuracy = ocrAccuracy;
+    }
+
+
+    public Long getTimeIn() {
         return timeIn;
     }
 
-    public void setTimeIn(long timeIn) {
+    public void setTimeIn(Long timeIn) {
         this.timeIn = timeIn;
     }
+
 
     public Long getTimeOut() {
         return timeOut;
     }
 
+
     public void setTimeOut(Long timeOut) {
         this.timeOut = timeOut;
     }
+
 
     public String getPlateNumber() {
         return plateNumber;

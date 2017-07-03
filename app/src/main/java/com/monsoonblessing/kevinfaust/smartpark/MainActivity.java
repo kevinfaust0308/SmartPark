@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
@@ -16,7 +15,6 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -32,15 +30,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.monsoonblessing.kevinfaust.smartpark.Firebase.Lot;
-import com.monsoonblessing.kevinfaust.smartpark.Firebase.Vehicle;
+import com.monsoonblessing.kevinfaust.smartpark.Firebase.LotController;
+import com.monsoonblessing.kevinfaust.smartpark.Firebase.LotObject;
+import com.monsoonblessing.kevinfaust.smartpark.Firebase.VehicleObject;
 import com.monsoonblessing.kevinfaust.smartpark.Fragments.ExitLotFragment;
 import com.monsoonblessing.kevinfaust.smartpark.Fragments.PayFragment;
 import com.monsoonblessing.kevinfaust.smartpark.Utilities.PermissionManager;
 import com.squareup.picasso.Picasso;
-import com.squareup.sdk.register.ChargeRequest;
-import com.squareup.sdk.register.RegisterClient;
-import com.squareup.sdk.register.RegisterSdk;
 
 import org.openalpr.OpenALPR;
 import org.openalpr.model.Results;
@@ -55,8 +51,6 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static com.squareup.sdk.register.CurrencyCode.CAD;
 
 public class MainActivity extends AppCompatActivity implements PayFragment.PayFragmentChoices {
 
@@ -77,16 +71,17 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
     @BindView(R.id.lot_availability_text)
     TextView lotAvailabilityTextView;
 
-    private DatabaseReference vehiclesDatabase;
-    private DatabaseReference vehicleLogDatabase;
-    private DatabaseReference parkingLotDatabase;
 
     private String licensePlate;
     private Double ocrAccuracy;
 
     // contains stuff related to parking lot like available spots and price
     // made it protected so we can access it from our fragment
-    protected Lot lot;
+    protected LotObject lot;
+
+
+    private LotController lotController;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,37 +112,18 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
         ANDROID_DATA_DIR = this.getApplicationInfo().dataDir;
         openAlprConfFile = ANDROID_DATA_DIR + File.separatorChar + "runtime_data" + File.separatorChar + "openalpr.conf";
 
-        // create two database references
-        parkingLotDatabase = FirebaseDatabase.getInstance().getReference()
-                .child(getString(R.string.UserData))
-                .child(ownerNumber)
-                .child(getString(R.string.ParkingLots))
-                .child(lotNumber);
-        vehiclesDatabase = parkingLotDatabase.child("Vehicles");
-        vehicleLogDatabase = parkingLotDatabase.child("VehicleLog");
+
+        // initiate control over the associated parking lot
+        lotController = new LotController(this, ownerNumber, lotNumber);
+
 
         // dynamic updating lot space text
-        parkingLotDatabase.addValueEventListener(new ValueEventListener() {
+        lotController.getLotReference().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                lot = dataSnapshot.getValue(Lot.class);
-
-                int availableSpots = lot.getAvailableSpots();
-                int maximumSpots = lot.getMaxSpots();
-
-                // lot availability text with color
-                lotAvailabilityTextView.setText("Availability: " + availableSpots + " / " + maximumSpots);
-                if (((float) availableSpots / maximumSpots) >= 0.60) {
-                    lotAvailabilityTextView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.md_green_200));
-                } else if (((float) availableSpots / maximumSpots) >= 0.30) {
-                    lotAvailabilityTextView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.md_orange_200));
-                } else {
-                    lotAvailabilityTextView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.md_red_500));
-                }
-
-                // display lot name
-                lotNameTextView.setText("Name: " + lot.getName());
+                updateLotDataAndUI(dataSnapshot);
             }
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -158,11 +134,56 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
     }
 
 
+    private void updateLotDataAndUI(DataSnapshot dataSnapshot) {
+        lot = dataSnapshot.getValue(LotObject.class);
+
+        int availableSpots = lot.getAvailableSpots();
+        int maximumSpots = lot.getMaxSpots();
+
+        // lot availability text with color
+        lotAvailabilityTextView.setText("Availability: " + availableSpots + " / " + maximumSpots);
+        if (((float) availableSpots / maximumSpots) >= 0.60) {
+            lotAvailabilityTextView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.md_green_200));
+        } else if (((float) availableSpots / maximumSpots) >= 0.30) {
+            lotAvailabilityTextView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.md_orange_200));
+        } else {
+            lotAvailabilityTextView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.md_red_500));
+        }
+
+        // display lot name
+        lotNameTextView.setText(String.format("Name: %s", lot.getName()));
+    }
+
+
     // PROCESS LICENSE PLATE BUTTON
     @OnClick(R.id.process_license_plate)
     void onProcessLicensePlate() {
         // take picture of license plate and see whether car is leaving or entering
         takePicture();
+    }
+
+
+    private String dateToString(Date date, String format) {
+        SimpleDateFormat df = new SimpleDateFormat(format, Locale.getDefault());
+        return df.format(date);
+    }
+
+
+    // using in pay fragment
+    private void takePicture() {
+        // Use a folder to store all results
+        File folder = new File(Environment.getExternalStorageDirectory() + "/OpenALPR/");
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+
+        // Generate the path for the next photo
+        String name = dateToString(new Date(), "yyyy-MM-dd-hh-mm-ss");
+        destination = new File(folder, name + ".jpg");
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(destination));
+        startActivityForResult(intent, REQUEST_IMAGE);
     }
 
 
@@ -179,13 +200,16 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                 .replace(R.id.fragment_container, payFragment).commit();
     }
 
+
     private void showRecognizedLicensePayFragment() {
         showPayFragment(true);
     }
 
+
     private void showUnrecognizedLicensePayFragment() {
         showPayFragment(false);
     }
+
 
     private void showExitLotFragment(double amountcharged, double timespent) {
         FragmentManager fragmentManager = getFragmentManager();
@@ -201,31 +225,12 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                 .replace(R.id.fragment_container, exitLotFragment).commit();
     }
 
+
     // using in fragment too
     private void emptyFragmentContainer() {
         licensePlateTextView.setText("WAITING");
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().remove(fragmentManager.findFragmentById(R.id.fragment_container)).commit();
-    }
-
-    private void addLicenseToDatabase() {
-        // create new vehicle object and store in database
-        Vehicle v = new Vehicle();
-        v.setPlateNumber(licensePlate);
-        v.setOcrAccuracy(ocrAccuracy);
-        v.setTimeIn(System.currentTimeMillis());
-        v.setTimeOut(null);
-
-        // vehiclesDatabase.child(licensePlate).setValue(v);
-        Toast.makeText(MainActivity.this, "Successfully registered license in system", Toast.LENGTH_SHORT).show();
-
-        // add vehicle under license plate to current vehicles list
-        vehiclesDatabase.child(licensePlate).setValue(v);
-        // add vehicle under push() to log entry of this vehicle
-        vehicleLogDatabase.push().setValue(v);
-
-        // subtract an available spot
-        decreaseSpaceAvailability();
     }
 
 
@@ -302,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                                             licensePlateTextView.setText(licensePlate);
 
                                             // check if we have this license in our system or not
-                                            vehiclesDatabase.child(licensePlate).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            lotController.getVehiclesReference().child(licensePlate).addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -313,38 +318,24 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                                                         showRecognizedLicensePayFragment();
 
                                                     } else {
-                                                        Log.d(TAG, "Vehicle already in system. Vehicle leaving");
+                                                        Log.d(TAG, "VehicleObject already in system. VehicleObject leaving");
                                                         // we will show their stats (see how long they were in the parking lot for)
-                                                        Vehicle vehicle = dataSnapshot.getValue(Vehicle.class);
+                                                        VehicleObject vehicle = dataSnapshot.getValue(VehicleObject.class);
+
+                                                        // remove the vehicle from our lot
+                                                        lotController.removeVehicle(vehicle, lot.getAvailableSpots());
 
                                                         // calculate time inside (in seconds)
-                                                        double amountCharged;
                                                         long timeSpent = (System.currentTimeMillis() - vehicle.getTimeIn()) / 1000;
-                                                        if (((double) timeSpent / 60) / 60 < lot.getMaxTime()) {
-                                                            amountCharged = ((double) timeSpent / 60) / 60 * lot.getHourlyCharge();
-                                                        } else {
-                                                            amountCharged = (double) lot.getMaxTime() * lot.getHourlyCharge();
-                                                        }
-
-
-                                                        /**
-                                                         *
-                                                         * REFUND CREDIT CARD
-                                                         *
-                                                         */
+                                                        double amountCharged = ((double) timeSpent / 60) / 60 * lot.getHourlyCharge();
 
 
                                                         // display to screen
                                                         Log.d(TAG, "Time spent: " + timeSpent);
                                                         Log.d(TAG, "Amount charged: " + amountCharged);
 
-                                                        // remove vehicle from database
-                                                        vehiclesDatabase.child(licensePlate).setValue(null);
 
-                                                        // free a space in the lot
-                                                        increaseSpaceAvailability();
-
-                                                        // show exit message for 10 seconds then revert back
+                                                        // show exit message for 5 seconds then revert back
                                                         // to license "waiting" screen
                                                         showExitLotFragment(amountCharged, timeSpent);
                                                         final Handler handler = new Handler();
@@ -354,11 +345,12 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                                                                 //Do something after 5s
                                                                 emptyFragmentContainer();
                                                             }
-                                                        }, 5000);
+                                                        }, 10000);
 
                                                     }
 
                                                 }
+
 
                                                 @Override
                                                 public void onCancelled(DatabaseError databaseError) {
@@ -369,16 +361,9 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
 
                                         }
 
-                                        // re-average the accuracy of this lot
-                                        int scans = lot.getLifetimeScans();
-                                        double curr_acc = lot.getAccuracy();
-                                        double new_acc = ((curr_acc * scans) + ocrAccuracy) / (scans + 1);
-                                        Log.d(TAG, "Current accuracy: " + curr_acc);
-                                        Log.d(TAG, "Newly scanned license accuracy: " + ocrAccuracy);
-                                        Log.d(TAG, "New acc: " + new_acc);
+                                        // reaverage lot accuracy with the just-scanned accuracy
+                                        lotController.reaverageLotAccuracy(lot, ocrAccuracy);
 
-                                        parkingLotDatabase.child("lifetimeScans").setValue(scans + 1);
-                                        parkingLotDatabase.child("accuracy").setValue(new_acc);
                                     }
                                 });
 
@@ -405,43 +390,12 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
     }
 
 
-    private String dateToString(Date date, String format) {
-        SimpleDateFormat df = new SimpleDateFormat(format, Locale.getDefault());
-        return df.format(date);
-    }
-
-    // using in pay fragment
-    private void takePicture() {
-        // Use a folder to store all results
-        File folder = new File(Environment.getExternalStorageDirectory() + "/OpenALPR/");
-        if (!folder.exists()) {
-            folder.mkdir();
-        }
-
-        // Generate the path for the next photo
-        String name = dateToString(new Date(), "yyyy-MM-dd-hh-mm-ss");
-        destination = new File(folder, name + ".jpg");
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(destination));
-        startActivityForResult(intent, REQUEST_IMAGE);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
         if (destination != null) {// Picasso does not seem to have an issue with a null value, but to be safe
             Picasso.with(MainActivity.this).load(destination).fit().centerCrop().into(licensePlateImageView);
         }
-    }
-
-
-    private void decreaseSpaceAvailability() {
-        parkingLotDatabase.child("availableSpots").setValue(lot.getAvailableSpots() - 1);
-    }
-
-    private void increaseSpaceAvailability() {
-        parkingLotDatabase.child("availableSpots").setValue(lot.getAvailableSpots() + 1);
     }
 
 
@@ -456,16 +410,16 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
             Toast.makeText(this, "No spots available", Toast.LENGTH_SHORT).show();
         } else {
 
-            Toast.makeText(this, "Simulating: Charging " + (int) ((double) lot.getMaxTime() * lot.getHourlyCharge() * 100), Toast.LENGTH_LONG).show();
-
-            // successfully charged credit card. add car to database
-            addLicenseToDatabase();
+            // add to lot
+            lotController.addVehicle(licensePlate, ocrAccuracy, lot.getAvailableSpots());
 
             // remove "pay" screen
             emptyFragmentContainer();
 
+            Toast.makeText(this, "Successfully registered license in system", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     public void onRetake() {
@@ -473,10 +427,12 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
         takePicture();
     }
 
+
     @Override
     public void onManual() {
         startSpeechToText();
     }
+
 
     /**
      * Start speech to text intent. This opens up Google Speech Recognition API dialog box to listen the speech input.
@@ -496,6 +452,5 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                     Toast.LENGTH_SHORT).show();
         }
     }
-
 
 }

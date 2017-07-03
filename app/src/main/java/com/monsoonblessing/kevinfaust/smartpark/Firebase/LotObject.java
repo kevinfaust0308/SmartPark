@@ -1,34 +1,30 @@
 package com.monsoonblessing.kevinfaust.smartpark.Firebase;
 
-import com.monsoonblessing.kevinfaust.smartpark.Firebase.Vehicle;
-
 import java.util.ArrayList;
 
 /**
  * Created by Kevin Faust on 3/28/2017.
  */
 
-public class Lot {
+public class LotObject {
 
     private String name;
     private int availableSpots;
     private int maxSpots;
-    private int maxTime;
     private double hourlyCharge;
     private String qrCodeUrl;
     private double accuracy;
     private int lifetimeScans;
-    private ArrayList<Vehicle> vehicles;
-    private ArrayList<Vehicle> vehicleLog;
+    private ArrayList<VehicleObject> vehicles;
+    private ArrayList<VehicleObject> vehicleLog;
 
-    public Lot() {
+    public LotObject() {
     }
 
-    public Lot(String name, int availableSpots, int maxSpots, int maxTime, double hourlyCharge, String qrCodeUrl) {
+    public LotObject(String name, int availableSpots, int maxSpots, double hourlyCharge, String qrCodeUrl) {
         this.name = name;
         this.availableSpots = availableSpots;
         this.maxSpots = maxSpots;
-        this.maxTime = maxTime;
         this.hourlyCharge = hourlyCharge;
         this.qrCodeUrl = qrCodeUrl;
         this.accuracy = 100.00;
@@ -67,13 +63,6 @@ public class Lot {
         this.maxSpots = maxSpots;
     }
 
-    public int getMaxTime() {
-        return maxTime;
-    }
-
-    public void setMaxTime(int maxTime) {
-        this.maxTime = maxTime;
-    }
 
     public double getHourlyCharge() {
         return hourlyCharge;
@@ -99,19 +88,19 @@ public class Lot {
         this.lifetimeScans = lifetimeScans;
     }
 
-    public ArrayList<Vehicle> getVehicles() {
+    public ArrayList<VehicleObject> getVehicles() {
         return vehicles;
     }
 
-    public void setVehicles(ArrayList<Vehicle> vehicles) {
+    public void setVehicles(ArrayList<VehicleObject> vehicles) {
         this.vehicles = vehicles;
     }
 
-    public ArrayList<Vehicle> getVehicleLog() {
+    public ArrayList<VehicleObject> getVehicleLog() {
         return vehicleLog;
     }
 
-    public void setVehicleLog(ArrayList<Vehicle> vehicleLog) {
+    public void setVehicleLog(ArrayList<VehicleObject> vehicleLog) {
         this.vehicleLog = vehicleLog;
     }
 }
