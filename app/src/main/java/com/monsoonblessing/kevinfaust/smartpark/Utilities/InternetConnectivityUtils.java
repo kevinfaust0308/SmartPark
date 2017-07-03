@@ -1,4 +1,4 @@
-package com.monsoonblessing.kevinfaust.smartpark;
+package com.monsoonblessing.kevinfaust.smartpark.Utilities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

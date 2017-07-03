@@ -1,4 +1,4 @@
-package com.monsoonblessing.kevinfaust.smartpark;
+package com.monsoonblessing.kevinfaust.smartpark.Utilities;
 
 /**
  * Created by Kevin Faust

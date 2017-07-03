@@ -1,4 +1,6 @@
-package com.monsoonblessing.kevinfaust.smartpark;
+package com.monsoonblessing.kevinfaust.smartpark.Firebase;
+
+import com.monsoonblessing.kevinfaust.smartpark.Firebase.Vehicle;
 
 import java.util.ArrayList;
 

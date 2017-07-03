@@ -1,4 +1,4 @@
-package com.monsoonblessing.kevinfaust.smartpark;
+package com.monsoonblessing.kevinfaust.smartpark.Fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -8,6 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import com.monsoonblessing.kevinfaust.smartpark.MainActivity;
+import com.monsoonblessing.kevinfaust.smartpark.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,7 +30,7 @@ public class PayFragment extends Fragment {
     /**
      * Callback interface to MainActivity
      */
-    interface PayFragmentChoices {
+    public interface PayFragmentChoices {
         void onVerify();
 
         void onRetake();

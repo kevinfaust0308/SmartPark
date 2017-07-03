@@ -32,6 +32,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.monsoonblessing.kevinfaust.smartpark.Firebase.Lot;
+import com.monsoonblessing.kevinfaust.smartpark.Firebase.Vehicle;
+import com.monsoonblessing.kevinfaust.smartpark.Fragments.ExitLotFragment;
+import com.monsoonblessing.kevinfaust.smartpark.Fragments.PayFragment;
+import com.monsoonblessing.kevinfaust.smartpark.Utilities.PermissionManager;
 import com.squareup.picasso.Picasso;
 import com.squareup.sdk.register.ChargeRequest;
 import com.squareup.sdk.register.RegisterClient;
@@ -55,7 +60,6 @@ import static com.squareup.sdk.register.CurrencyCode.CAD;
 
 public class MainActivity extends AppCompatActivity implements PayFragment.PayFragmentChoices {
 
-    private static final int CHARGE_REQUEST_CODE = 1;
     private final int SPEECH_RECOGNITION_CODE = 10;
     private static final int REQUEST_IMAGE = 100;
 
@@ -84,9 +88,6 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
     // made it protected so we can access it from our fragment
     protected Lot lot;
 
-    // square client object
-    private RegisterClient registerClient;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,8 +104,7 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
         }
 
         ButterKnife.bind(this);
-        String YOUR_CLIENT_ID = "sq0idp-KWJSh56loQYFrj_K9C0U0g";
-        registerClient = RegisterSdk.createClient(this, YOUR_CLIENT_ID);
+
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         // get parking lot number associated with this android device
         String lotNumber = sharedPreferences.getString(getString(R.string.lotNumber), null);
@@ -351,10 +351,10 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                                                         handler.postDelayed(new Runnable() {
                                                             @Override
                                                             public void run() {
-                                                                //Do something after 100ms
+                                                                //Do something after 5s
                                                                 emptyFragmentContainer();
                                                             }
-                                                        }, 10000);
+                                                        }, 5000);
 
                                                     }
 
@@ -400,46 +400,6 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
                 break;
             }
 
-            /**
-             * Callback from mobile payment
-             */
-            case CHARGE_REQUEST_CODE: {
-                if (data == null) {
-                    showDialog("Error", "Square Register was uninstalled or crashed", null);
-                    return;
-                }
-
-                if (resultCode == Activity.RESULT_OK) {
-                    ChargeRequest.Success success = registerClient.parseChargeSuccess(data);
-                    String message = "Payment accepted";
-                    showDialog("Success!", message, null);
-
-                    // successfully charged credit card. add car to database
-                    addLicenseToDatabase();
-
-                    // remove "pay" screen
-                    emptyFragmentContainer();
-                } else {
-                    ChargeRequest.Error error = registerClient.parseChargeError(data);
-
-                    if (error.code == ChargeRequest.ErrorCode.TRANSACTION_ALREADY_IN_PROGRESS) {
-                        String title = "A transaction is already in progress";
-                        String message = "Please complete the current transaction in Register.";
-
-                        showDialog(title, message, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Some errors can only be fixed by launching Register
-                                // from the Home screen.
-                                registerClient.launchRegister();
-                            }
-                        });
-                    } else {
-                        showDialog("Error: " + error.code, error.debugDescription, null);
-                    }
-                }
-                break;
-            }
 
         }
     }
@@ -485,40 +445,6 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
     }
 
 
-    // 1. Charge card maximum
-    // 2. TODO: give card refund upon leaving
-
-    /**
-     * Opens external Square Register app to charge credit card
-     *
-     * @param cost in cents
-     * @return true if transaction is successful
-     */
-    private boolean chargeCard(int cost) {
-
-        ChargeRequest request = new ChargeRequest.Builder(cost, CAD).build();
-        try {
-            Intent intent = registerClient.createChargeIntent(request);
-            startActivityForResult(intent, CHARGE_REQUEST_CODE);
-        } catch (ActivityNotFoundException e) {
-            showDialog("Error", "Square Register is not installed", null);
-            registerClient.openRegisterPlayStoreListing();
-            return false;
-        }
-        return true;
-    }
-
-    // literally copied and pasted from here: https://docs.connect.squareup.com/articles/register-api-android
-    private void showDialog(String title, String message, DialogInterface.OnClickListener listener) {
-        Log.d("MainActivity", title + " " + message);
-        new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, listener)
-                .show();
-    }
-
-
     /**
      * Choices user can choose after license plate is analyzed
      */
@@ -529,7 +455,15 @@ public class MainActivity extends AppCompatActivity implements PayFragment.PayFr
         if (lot.getAvailableSpots() == 0) {
             Toast.makeText(this, "No spots available", Toast.LENGTH_SHORT).show();
         } else {
-            chargeCard((int) ((double) lot.getMaxTime() * lot.getHourlyCharge() * 100)); // convert to cents
+
+            Toast.makeText(this, "Simulating: Charging " + (int) ((double) lot.getMaxTime() * lot.getHourlyCharge() * 100), Toast.LENGTH_LONG).show();
+
+            // successfully charged credit card. add car to database
+            addLicenseToDatabase();
+
+            // remove "pay" screen
+            emptyFragmentContainer();
+
         }
     }
 

@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.monsoonblessing.kevinfaust.smartpark.Popups.InternetRequiredPopup;
+import com.monsoonblessing.kevinfaust.smartpark.Utilities.InternetConnectivityUtils;
+import com.monsoonblessing.kevinfaust.smartpark.Utilities.PermissionManager;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
